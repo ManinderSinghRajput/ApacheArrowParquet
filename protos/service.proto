@@ -1,0 +1,42 @@
+
+/*
+For a specified timeframe
+Total number of invoice_line_items
+Total quantity
+Total price
+Number of unique accounts
+Number of unique products
+ */
+
+syntax = "proto3";
+
+option go_package = "go/apis";
+
+package apis;
+
+service Service {
+
+  rpc GetTotalItems (Empty) returns (CountAsReply) {}
+  rpc GetTotalQuantity (Empty) returns (GetTotalQuantityReply) {}
+  rpc GetTotalPrice (Empty) returns (GetTotalPriceReply) {}
+  rpc GetUniqueAccountsCount (Empty) returns (CountAsReply) {}
+  rpc GetUniqueProductsCount (Empty) returns (CountAsReply) {}
+}
+
+message CountAsReply {
+  int64 count = 1;
+}
+
+message GetOnBasisOfProductIdRequest {
+  int64 productId = 1;
+}
+
+message GetTotalQuantityReply {
+  double quantity = 1;
+}
+
+message GetTotalPriceReply {
+  double price = 1;
+}
+
+message Empty {}
