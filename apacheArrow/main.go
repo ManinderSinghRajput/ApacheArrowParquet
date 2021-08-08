@@ -5,6 +5,8 @@ import (
 	"log"
 	"net"
 	"os"
+	"sync"
+	"time"
 
 	"github.com/apache/arrow/go/arrow"
 	"github.com/apache/arrow/go/arrow/array"
@@ -38,16 +40,6 @@ func main() {
 	{
 		filename := os.Args[1]
 
-		// Loading arrow file
-		rFile, err := os.OpenFile(filename, os.O_RDONLY, 0644)
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
-		defer rFile.Close()
-
-		mem := memory.NewCheckedAllocator(memory.NewGoAllocator())
-
 		schema := arrow.NewSchema(
 			[]arrow.Field{
 				arrow.Field{Name: "date", Type: arrow.PrimitiveTypes.Int64},
@@ -59,40 +51,54 @@ func main() {
 			nil, // no metadata
 		)
 
-		r, err := ipc.NewReader(rFile, ipc.WithSchema(schema), ipc.WithAllocator(mem))
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
-		defer r.Release()
+		var records []array.Record
+		var recMutex sync.RWMutex
+		go func (){
+			for {
+				// Loading arrow file
+				rFile, err := os.OpenFile(filename, os.O_RDONLY, 0644)
+				if err != nil {
+					fmt.Println(err.Error())
+					return
+				}
 
-		r.Retain()
-		r.Release()
+				mem := memory.NewCheckedAllocator(memory.NewGoAllocator())
+				var tmpRecords []array.Record
+				fmt.Println("reading records")
+				r, err := ipc.NewReader(rFile, ipc.WithSchema(schema), ipc.WithAllocator(mem))
+				if err != nil {
+					fmt.Println(err.Error())
+					return
+				}
 
-		fmt.Println("reading records")
-		records := make([]array.Record, 0)
-		for r.Next() {
-			rec := r.Record()
-			rec.Retain()
-			records = append(records, rec)
-		}
-		fmt.Printf("finished reading %d records!\n", len(records))
+				for r.Next() {
+					rec := r.Record()
+					rec.Retain()
+					tmpRecords = append(tmpRecords, rec)
+				}
+				r.Release()
+				rFile.Close()
+
+				if len(records) != len(tmpRecords){
+					recMutex.Lock()
+					records = tmpRecords
+					recMutex.Unlock()
+					fmt.Printf("finished reading %d records!\n", len(records))
+				}else{
+					fmt.Println("No new records are appended")
+				}
+
+				time.Sleep(4 * time.Second)
+			}
+		}()
+
 
 		//Start Server
-		serve(schema, records)
-
-		/*n := 0
-		for tr.Next() {
-			rec := tr.Record()
-			for i, col := range rec.Columns() {
-				fmt.Printf("rec[%d][%q]: %v\n", n, rec.ColumnName(i), col)
-			}
-			n++
-		}*/
+		serve(schema, &records, recMutex)
 	}
 }
 
-func serve(schema *arrow.Schema, records []array.Record) {
+func serve(schema *arrow.Schema, records *[]array.Record, recMutex sync.RWMutex) {
 	//Create a grpc services
 	fmt.Printf("StartingServing on [%s]\n", ipPort)
 	lis, err := net.Listen("tcp", ipPort)
@@ -103,6 +109,7 @@ func serve(schema *arrow.Schema, records []array.Record) {
 	s := services.Server{
 		Schema:  schema,
 		Records: records,
+		RecMutex: recMutex,
 	}
 
 	grpcServer := grpc.NewServer()

@@ -8,11 +8,13 @@ import (
 	"github.com/apache/arrow/go/arrow/array"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type Server struct {
 	Schema  *arrow.Schema
-	Records []array.Record
+	Records *[]array.Record
+	RecMutex sync.RWMutex
 }
 
 // GetTotalItems : To get no of invoice lines
@@ -115,7 +117,11 @@ func (s Server) GetTotalPrice(ctx context.Context, empty *apis.Empty) (*apis.Get
 }
 
 func (s Server) getReader() *array.TableReader {
-	table := array.NewTableFromRecords(s.Schema, s.Records)
+
+	s.RecMutex.RLock()
+	table := array.NewTableFromRecords(s.Schema, *s.Records)
+	s.RecMutex.RUnlock()
+
 	defer table.Release()
 
 	table.Retain()

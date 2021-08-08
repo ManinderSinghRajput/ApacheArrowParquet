@@ -28,8 +28,8 @@ Quantity float64
 Price    float64
 }*/
 
-const recordNumber = 5
-const noOfBatches = 2
+const recordNumber = 2
+const noOfBatches = 5
 
 func main() {
 	f, err := os.OpenFile("output.parquet", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
@@ -55,7 +55,7 @@ func main() {
 
 	r := rand.New(rand.NewSource(99))
 	for nb := 0; nb < noOfBatches; nb++ {
-		fmt.Println("Generating data for batch 1")
+		fmt.Println("Generating data for batch ")
 		for rn := 0; rn < recordNumber; rn++ {
 			if err := fw.AddData(map[string]interface{}{
 				"date":     time.Now().Unix(),
