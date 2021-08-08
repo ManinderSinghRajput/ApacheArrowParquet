@@ -14,7 +14,7 @@ import (
 const recordNumber = 2
 const noOfBatches = 100
 
-func main(){
+func main() {
 	mem := memory.NewGoAllocator()
 
 	wFile, err := os.OpenFile("output.arrow", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
@@ -41,17 +41,17 @@ func main(){
 
 	r := rand.New(rand.NewSource(99))
 
-	for nb := 0; nb<noOfBatches; nb++{
+	for nb := 0; nb < noOfBatches; nb++ {
 		fmt.Printf("generating Batch No: %d\n", nb)
-		for i:=0; i<recordNumber;i++{
+		for i := 0; i < recordNumber; i++ {
 			b.Field(0).(*array.Int64Builder).Append(time.Now().Unix())
 			b.Field(1).(*array.Int64Builder).Append(r.Int63n(10000))
 			b.Field(2).(*array.Int64Builder).Append(r.Int63n(10000))
 			b.Field(3).(*array.Float64Builder).Append(r.Float64() * float64(r.Int63n(10000)))
-			b.Field(4).(*array.Float64Builder).Append(r.Float64() * float64(r.Int63n(10000)) + 1)
+			b.Field(4).(*array.Float64Builder).Append(r.Float64()*float64(r.Int63n(10000)) + 1)
 
 			rec := b.NewRecord()
-			if err = w.Write(rec); err != nil{
+			if err = w.Write(rec); err != nil {
 				fmt.Println(err.Error())
 			}
 			rec.Release()

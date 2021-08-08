@@ -74,6 +74,7 @@ func (s Server) GetUniqueProductsCount(ctx context.Context, empty *apis.Empty) (
 
 // GetTotalQuantity : Get total count of quantity of different items
 func (s Server) GetTotalQuantity(ctx context.Context, empty *apis.Empty) (*apis.GetTotalQuantityReply, error) {
+	fmt.Println("Called GetTotalQuantity")
 	tr := s.getReader()
 	defer tr.Release()
 
@@ -94,6 +95,7 @@ func (s Server) GetTotalQuantity(ctx context.Context, empty *apis.Empty) (*apis.
 
 // GetTotalPrice : Get total price of different items
 func (s Server) GetTotalPrice(ctx context.Context, empty *apis.Empty) (*apis.GetTotalPriceReply, error) {
+	fmt.Println("Called GetTotalPrice")
 	tr := s.getReader()
 	defer tr.Release()
 

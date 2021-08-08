@@ -4,8 +4,8 @@ SHELL = bash -e -o pipefail
 # Variables
 SERVER_NAME = main.go
 CLIENT_NAME = ../client/client.go
-SERVER_BIN_NAME = server
-CLIENT_BIN_NAME = client
+SERVER_BIN_NAME = build/server
+CLIENT_BIN_NAME = build/client
 GO_LINTER = golangci-lint
 ARGS = "output.arrow"
 DEBUG_ARGS = -debug
@@ -19,11 +19,30 @@ fmt:
 
 build: clean
 	@if test ! -d build; then mkdir build; fi
-	@${GO} build -o build/${SERVER_BIN_NAME} ${SERVER_NAME}
-	@${GO} build -o build/${CLIENT_BIN_NAME} ${CLIENT_NAME}
+	@${GO} build -o ${SERVER_BIN_NAME} ${SERVER_NAME}
+	@${GO} build -o ${CLIENT_BIN_NAME} ${CLIENT_NAME}
+
+build-client: clean-client
+	@${GO} build -o ${CLIENT_BIN_NAME} ${CLIENT_NAME}
+
+mod-update:
+	@${GO} mod tidy
+	@${GO} mod vendor
+
+mod-download:
+	@${GO} mod download
+
+mod-vendor: mod-update
+	@${GO} mod vendor
 
 run: build
-	@./${SERVER_BIN_NAME} ${ARGS}
+	@${SERVER_BIN_NAME} ${ARGS}
+
+run-client: build-client
+	@${CLIENT_BIN_NAME}
+
+produce:
+	@${GO} run producer/producer.go
 
 test:
 	@${GO} test -cover ${PACKAGES}
@@ -34,4 +53,7 @@ lint:
 clean:
 	@rm -rf build/*
 
-prep: fmt lint build test
+clean-client:
+	@rm -rf build/client
+
+prep: fmt mod-update mod-download lint build test

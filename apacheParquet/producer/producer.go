@@ -38,7 +38,7 @@ func main() {
 	}
 	defer f.Close()
 
-	schemaDef, err := parquetschema.ParseSchemaDefinition(
+	schemaDef, _ := parquetschema.ParseSchemaDefinition(
 		`message data {
 			required int64 date;
 			required int64 account;
@@ -67,7 +67,7 @@ func main() {
 				log.Fatalf("Failed to add input to parquet file: %v", err)
 			}
 		}
-		if err = fw.FlushRowGroup(); err != nil{
+		if err = fw.FlushRowGroup(); err != nil {
 			fmt.Println(err.Error())
 			return
 		}
@@ -75,9 +75,7 @@ func main() {
 		time.Sleep(5 * time.Second)
 	}
 
-
 	if err := fw.Close(); err != nil {
 		log.Fatalf("Closing parquet file writer failed: %v", err)
 	}
 }
-

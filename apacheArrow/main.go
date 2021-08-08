@@ -1,7 +1,6 @@
 package main
 
 import (
-	"apacheArrowParquet/services"
 	"fmt"
 	"log"
 	"net"
@@ -13,6 +12,7 @@ import (
 	"github.com/apache/arrow/go/arrow/memory"
 	"google.golang.org/grpc"
 
+	"apacheArrowParquet/apacheArrow/services"
 	"apacheArrowParquet/go/apis"
 )
 
