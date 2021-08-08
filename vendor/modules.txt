@@ -2,6 +2,7 @@
 ## explicit
 github.com/apache/arrow/go/arrow
 github.com/apache/arrow/go/arrow/array
+github.com/apache/arrow/go/arrow/arrio
 github.com/apache/arrow/go/arrow/bitutil
 github.com/apache/arrow/go/arrow/csv
 github.com/apache/arrow/go/arrow/decimal128
@@ -9,7 +10,16 @@ github.com/apache/arrow/go/arrow/endian
 github.com/apache/arrow/go/arrow/float16
 github.com/apache/arrow/go/arrow/internal/cpu
 github.com/apache/arrow/go/arrow/internal/debug
+github.com/apache/arrow/go/arrow/internal/flatbuf
+github.com/apache/arrow/go/arrow/ipc
 github.com/apache/arrow/go/arrow/memory
+# github.com/apache/thrift v0.13.0
+github.com/apache/thrift/lib/go/thrift
+# github.com/fraugster/parquet-go v0.3.0
+## explicit
+github.com/fraugster/parquet-go
+github.com/fraugster/parquet-go/parquet
+github.com/fraugster/parquet-go/parquetschema
 # github.com/golang/protobuf v1.5.2
 ## explicit
 github.com/golang/protobuf/proto
@@ -17,6 +27,23 @@ github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
+# github.com/golang/snappy v0.0.3
+github.com/golang/snappy
+# github.com/google/flatbuffers v2.0.0+incompatible
+github.com/google/flatbuffers/go
+# github.com/klauspost/compress v1.13.1
+github.com/klauspost/compress/fse
+github.com/klauspost/compress/huff0
+github.com/klauspost/compress/zstd
+github.com/klauspost/compress/zstd/internal/xxhash
+# github.com/pierrec/lz4/v4 v4.1.8
+github.com/pierrec/lz4/v4
+github.com/pierrec/lz4/v4/internal/lz4block
+github.com/pierrec/lz4/v4/internal/lz4errors
+github.com/pierrec/lz4/v4/internal/lz4stream
+github.com/pierrec/lz4/v4/internal/xxh32
+# github.com/pkg/errors v0.9.1
+github.com/pkg/errors
 # golang.org/x/net v0.0.0-20210614182718-04defd469f4e
 golang.org/x/net/http/httpguts
 golang.org/x/net/http2

@@ -19,6 +19,7 @@ fmt:
 
 mod-update:
 	@${GO} mod tidy
+	@${GO} mod vendor
 
 mod-download:
 	@${GO} mod download

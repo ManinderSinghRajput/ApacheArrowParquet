@@ -1,0 +1,85 @@
+package main
+
+import (
+	"fmt"
+	"github.com/xitongsys/parquet-go-source/local"
+	"github.com/xitongsys/parquet-go/reader"
+	"github.com/xitongsys/parquet-go/source"
+)
+
+/*
+date: Timestamp
+account: Integer → a account identifier
+product: Integer → a product identifier
+quantity: Float → how many units of the product is sold to an account
+price: Float → what is the total price for the products sold to the account
+*/
+
+type dataItem struct {
+	Date     int64   `parquet:"name=timestamp, type=INT64"`
+	Account  int64   `parquet:"name=account, type=INT64"`
+	Product  int64   `parquet:"name=product, type=INT64"`
+	Quantity float64 `parquet:"name=quantity, type=DOUBLE"`
+	Price    float64 `parquet:"name=price, type=DOUBLE"`
+}
+
+const recordNumber = 10000
+
+func main() {
+	var data []*dataItem
+
+	fr, err := local.NewLocalFileReader("output.parquet")
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	for i:= 0; ; i++{
+		tmp , err := readPartialParquet(fr, 2, i)
+		if err != nil{
+			fmt.Println(err.Error())
+			break
+		}
+		if len(tmp) == 0{
+			break
+		}
+		data = append(data, tmp...)
+	}
+	fr.Close()
+
+	for i:= 0; i< len(data); i++{
+		fmt.Println(*data[i])
+	}
+
+}
+
+func readPartialParquet(fr source.ParquetFile, pageSize, page int) ([]*dataItem, error) {
+	pr, err := reader.NewParquetReader(fr, new(dataItem), int64(pageSize))
+	if err != nil {
+		return nil, err
+	}
+	pr.SkipRows(int64(pageSize * page))
+	u := make([]*dataItem, pageSize)
+	if err = pr.Read(&u); err != nil {
+		return nil, err
+	}
+	pr.ReadStop()
+	return u, nil
+}
+
+func readParquet() ([]*dataItem, error) {
+	fr, err := local.NewLocalFileReader("output.parquet")
+	if err != nil {
+		return nil, err
+	}
+	pr, err := reader.NewParquetReader(fr, new(dataItem), recordNumber)
+	if err != nil {
+		return nil, err
+	}
+	u := make([]*dataItem, recordNumber)
+	if err = pr.Read(&u); err != nil {
+		return nil, err
+	}
+	pr.ReadStop()
+	fr.Close()
+	return u, nil
+}

@@ -8,10 +8,12 @@ import (
 	"google.golang.org/grpc"
 )
 
+var ipPort = ":9090"
+
 func main() {
 
 	var conn *grpc.ClientConn
-	conn, err := grpc.Dial(":9090", grpc.WithInsecure())
+	conn, err := grpc.Dial(ipPort, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("did not connect: %s", err)
 	}

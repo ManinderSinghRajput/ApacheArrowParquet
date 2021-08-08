@@ -1,0 +1,87 @@
+package main
+
+import (
+	"fmt"
+	"log"
+	"time"
+
+	"math/rand"
+
+	"github.com/xitongsys/parquet-go-source/local"
+	"github.com/xitongsys/parquet-go/parquet"
+	"github.com/xitongsys/parquet-go/writer"
+)
+
+/*
+date: Timestamp
+account: Integer → a account identifier
+product: Integer → a product identifier
+quantity: Float → how many units of the product is sold to an account
+price: Float → what is the total price for the products sold to the account
+*/
+
+type dataItem struct {
+	Date     int64   `parquet:"name=timestamp, type=INT64"`
+	Account  int64   `parquet:"name=account, type=INT64"`
+	Product  int64   `parquet:"name=product, type=INT64"`
+	Quantity float64 `parquet:"name=quantity, type=DOUBLE"`
+	Price    float64 `parquet:"name=price, type=DOUBLE"`
+}
+
+//const recordNumber = 10000
+const recordNumber = 5
+const noOfBatches = 2
+
+func main() {
+	log.Println("generating parquet file")
+	fw, err := local.NewLocalFileWriter("output.parquet")
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	defer fw.Close()
+
+	pw, err := writer.NewParquetWriter(fw, new(dataItem), recordNumber)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	//compression type
+	pw.CompressionType = parquet.CompressionCodec_GZIP
+
+	//create fake data
+	r := rand.New(rand.NewSource(99))
+	for nb := 0; nb < noOfBatches; nb++{
+		data := []*dataItem{}
+		for i := 0; i < recordNumber; i++ {
+			d := &dataItem{
+				Date:     time.Now().Unix(),
+				Account:  r.Int63n(10000),
+				Product:  r.Int63n(10000),
+				Quantity: r.Float64() * float64(r.Int63n(10000)),
+				Price:    r.Float64() * float64(r.Int63n(100)),
+			}
+
+			fmt.Println(*d)
+			data = append(data, d)
+		}
+		err := generateParquet(pw, data)
+		if err != nil {
+			log.Fatal(err)
+		}
+		time.Sleep(2*time.Second)
+	}
+}
+
+func generateParquet(pw *writer.ParquetWriter, data []*dataItem) error {
+
+	for _, d := range data {
+		if err := pw.Write(d); err != nil {
+			return err
+		}
+	}
+	if err := pw.WriteStop(); err != nil {
+		return err
+	}
+	return nil
+}

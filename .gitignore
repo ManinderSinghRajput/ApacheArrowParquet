@@ -1,0 +1,7 @@
+.idea
+build/
+vendor/
+output.arrow
+output.parquet
+apacheArrow/build
+apacheParquet/build
